@@ -11,3 +11,4 @@
 /.idea/
 composer.lock
 ###< symfony/framework-bundle ###
+.env
