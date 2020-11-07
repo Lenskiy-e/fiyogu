@@ -15,6 +15,15 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User
 {
     /**
+     * @var string ROLE_USER
+     */
+    const ROLE_USER = 'ROLE_USER';
+    /**
+     * @var string ROLE_ADMIN
+     */
+    const ROLE_ADMIN = 'ROLE_ADMIN';
+
+    /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -28,19 +37,15 @@ class User
 
     /**
      * @ORM\Column (type="text")
-     * @Assert\Length(min="8")
-     * @Assert\NotBlank()
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=20)
-     * @Assert\Length(min="3", max="20")
      */
     private $username;
 
     /**
-     * @Assert\DateTime(format="d.m.Y")
      * @ORM\Column(type="datetime")
      */
     private $created_at;
@@ -50,11 +55,23 @@ class User
      */
     private $profile;
 
+    /**
+     * @ORM\Column (type="simple_array")
+     */
+    private $roles;
+
+    /**
+     * User constructor.
+     */
     public function __construct()
     {
-        $this->created_at = time();
+        $this->created_at = new \DateTime();
+        $this->roles = [self::ROLE_USER];
     }
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
@@ -109,11 +126,43 @@ class User
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
-    public function getCreatedAt(): int
+    public function getCreatedAt(): \DateTime
     {
         return $this->created_at;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfile()
+    {
+        return $this->profile;
+    }
+
+    /**
+     * @param mixed $profile
+     */
+    public function setProfile($profile): void
+    {
+        $this->profile = $profile;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param string[] $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
     }
 
 

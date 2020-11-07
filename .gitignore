@@ -12,3 +12,4 @@
 composer.lock
 ###< symfony/framework-bundle ###
 .env
+/src/DTO_old/
