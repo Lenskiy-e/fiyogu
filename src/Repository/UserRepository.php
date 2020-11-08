@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,9 +15,34 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class UserRepository extends ServiceEntityRepository
 {
+    /**
+     * UserRepository constructor.
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
+    }
+
+    /**
+     * @param string $token
+     * @return User|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findForActivation(string $token): ?User
+    {
+        $user = $this->createQueryBuilder('u')
+            ->where('u.activation_token = :token')
+            ->andWhere('u.active = 0')
+            ->setParameter('token', $token)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if(!$user) {
+            throw new EntityNotFoundException();
+        }
+
+        return $user;
     }
 
     // /**

@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\ProfileRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ProfileRepository::class)
@@ -25,19 +24,16 @@ class Profile
 
     /**
      * @ORM\Column(type="string", length=100)
-     * @Assert\Length(max="100", min="2")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=100, nullable=true)
-     * @Assert\Length(max="100", min="2")
      */
     private $surname;
 
     /**
      * @ORM\Column (type="string", length=30, nullable=true)
-     * @Assert\Length(min="8", max="30")
      */
     private $phone;
 

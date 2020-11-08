@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -12,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity("email", message="This e-mail is already used")
  * @UniqueEntity("username", message="This username is already used")
  */
-class User
+class User implements UserInterface
 {
     /**
      * @var string ROLE_USER
@@ -58,7 +59,31 @@ class User
     /**
      * @ORM\Column (type="simple_array")
      */
-    private $roles;
+    private array $roles;
+
+    /**
+     * @ORM\Column(type="string", length=50, nullable=true)
+     * @Assert\Length(min="50", max="50")
+     */
+    private $session_token;
+
+    /**
+     * @ORM\Column(type="string", length=50, nullable=true)
+     * @Assert\Length(min="50", max="50")
+     */
+    private $activation_token;
+
+    /**
+     * @ORM\Column(type="string", length=100, nullable=true)
+     * @Assert\Length(min="100", max="100")
+     */
+    private $recovery_token;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean")
+     */
+    private bool $active;
 
     /**
      * User constructor.
@@ -67,6 +92,7 @@ class User
     {
         $this->created_at = new \DateTime();
         $this->roles = [self::ROLE_USER];
+        $this->active = false;
     }
 
     /**
@@ -165,5 +191,78 @@ class User
         $this->roles = $roles;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getActivationToken()
+    {
+        return $this->activation_token;
+    }
 
+    /**
+     * @param mixed $activation_token
+     */
+    public function setActivationToken($activation_token): void
+    {
+        $this->activation_token = $activation_token;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRecoveryToken()
+    {
+        return $this->recovery_token;
+    }
+
+    /**
+     * @param mixed $recovery_token
+     */
+    public function setRecoveryToken($recovery_token): void
+    {
+        $this->recovery_token = $recovery_token;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool $active
+     */
+    public function setActive(bool $active): void
+    {
+        $this->active = $active;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSessionToken()
+    {
+        return $this->session_token;
+    }
+
+    /**
+     * @param mixed $session_token
+     */
+    public function setSessionToken($session_token): void
+    {
+        $this->session_token = $session_token;
+    }
+
+
+    public function getSalt()
+    {
+        // TODO: Implement getSalt() method.
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
 }

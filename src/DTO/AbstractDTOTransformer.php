@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\Mapping\Entity;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -19,6 +19,11 @@ abstract class AbstractDTOTransformer
     protected ValidatorInterface $validator;
 
     /**
+     * @var array
+     */
+    protected array $request;
+
+    /**
      * AbstractDTOTransformer constructor.
      * @param ValidatorInterface $validator
      */
@@ -31,7 +36,7 @@ abstract class AbstractDTOTransformer
      * @param array $data
      * @return DTOInterface
      */
-    abstract protected function setFields(array $data): DTOInterface;
+    abstract protected function setFields(): DTOInterface;
 
     /**
      * @param array $request
@@ -39,8 +44,9 @@ abstract class AbstractDTOTransformer
      */
     public function transform(array $request) : DTOInterface
     {
-        $this->checkMissFields($request);
-        $dto = $this->setFields($request);
+        $this->request = $request;
+        $this->checkMissFields();
+        $dto = $this->setFields();
         $this->validate($dto);
         return $dto;
     }
@@ -49,9 +55,9 @@ abstract class AbstractDTOTransformer
      * @param array $request
      * @throws \Exception
      */
-    protected function checkMissFields(array $request) : void
+    protected function checkMissFields() : void
     {
-        if($fields = array_diff($this->required, array_keys($request))) {
+        if($fields = array_diff($this->required, array_keys($this->request))) {
             throw new DTOException('Request missing required fields: ' . implode(',', $fields),466);
         }
     }

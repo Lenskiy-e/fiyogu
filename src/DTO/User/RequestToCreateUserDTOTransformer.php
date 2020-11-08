@@ -6,7 +6,6 @@ namespace App\DTO\User;
 use App\DTO\AbstractDTOTransformer;
 use App\DTO\DTOException;
 use App\DTO\DTOInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class RequestToCreateUserDTOTransformer
@@ -20,18 +19,17 @@ class RequestToCreateUserDTOTransformer extends AbstractDTOTransformer
     protected array $required = ['email', 'password', 'username', 'name'];
 
     /**
-     * @param array $request
      * @return DTOInterface
      * @throws DTOException
      */
-    protected function setFields(array $request) : DTOInterface
+    protected function setFields() : DTOInterface
     {
         $dto = new CreateUserDTO();
 
-        $dto->setUsername( $request['username']);
-        $dto->setPassword( $request['password']);
-        $dto->setEmail( $request['email']);
-        $dto->setName( $request['name'] );
+        $dto->setUsername( $this->request['username'] );
+        $dto->setPassword( $this->request['password'] );
+        $dto->setEmail( $this->request['email'] );
+        $dto->setName( $this->request['name'] );
 
         return $dto;
     }
