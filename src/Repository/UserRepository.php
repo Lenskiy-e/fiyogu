@@ -24,25 +24,26 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    /**
-     * @param string $token
-     * @return User|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function findForActivation(string $token): ?User
+    public function findForActivation(string $token) : ?User
     {
-        $user = $this->createQueryBuilder('u')
+        return $this->createQueryBuilder('u')
             ->where('u.activation_token = :token')
             ->andWhere('u.active = 0')
             ->setParameter('token', $token)
             ->getQuery()
             ->getOneOrNullResult();
+    }
 
-        if(!$user) {
-            throw new EntityNotFoundException();
-        }
-
-        return $user;
+    public function getUsersWithSkill(int $skill_id)
+    {
+        $query = $this->createQueryBuilder('u')
+            ->innerJoin('u.skills', 's')
+            ->where('s.id = :id')
+            ->andWhere('u.active = 1')
+            ->setParameter('id', $skill_id)
+            ->getQuery()
+            ->getResult();
+        return $query;
     }
 
     // /**

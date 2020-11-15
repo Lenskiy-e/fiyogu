@@ -1,0 +1,3 @@
+<h2>Hello, {{ user.profile.name }}!</h2>
+We are glad to see you on our service!
+To complete registration, please, follow the <a href="{{ url('user_activate', {'token': user.activationToken}) }}">activation link</a>

@@ -3,20 +3,21 @@
 namespace App\Controller;
 
 use App\DTO\DTOException;
-use App\DTO\User\RequestToCreateUserDTOTransformer;
-use App\DTO\User\CreateUserDTO;
+use App\DTO\User\GetUserFullPublicInfoDTO;
 use App\Entity\Profile;
 use App\Entity\User;
+use App\Event\UserCreateEvent;
+use App\Form\CreateProfileType;
+use App\Form\CreateUserType;
 use App\Repository\UserRepository;
-use App\Services\TokenGenerator;
+use App\Services\FormErrors;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
-use Doctrine\ORM\NonUniqueResultException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -66,44 +67,58 @@ class UserController extends AbstractController
 
     /**
      * @param Request $request
-     * @param RequestToCreateUserDTOTransformer $transformer
-     * @param EntityManagerInterface $manager
-     * @param UserPasswordEncoderInterface $encoder
-     * @param TokenGenerator $generator
+     * @param EventDispatcherInterface $dispatcher
+     * @param FormErrors $formErrorsService
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @Route ("/create", name="user_create", methods={"POST"})
      */
     public function create
     (
         Request $request,
-        RequestToCreateUserDTOTransformer $transformer,
-        UserPasswordEncoderInterface $encoder,
-        TokenGenerator $generator
+        EventDispatcherInterface $dispatcher,
+        FormErrors $formErrorsService
     )
     {
-        try {
-            /** @var CreateUserDTO $dto */
-            $dto = $transformer->transform( json_decode( $request->getContent(),true ) );
-            $user = new User();
-            $profile = new Profile();
+        $data = json_decode($request->getContent(),true);
+        $user = new User();
+        $profile = new Profile();
 
+        $userForm = $this->createForm(CreateUserType::class, $user);
+        $profileForm = $this->createForm(CreateProfileType::class, $profile);
+        $userForm->submit($data);
+        $profileForm->submit($data);
 
-            $user->setEmail( $dto->getEmail() );
-            $user->setPassword( $encoder->encodePassword($user, $dto->getPassword() ) );
-            $user->setUsername( $dto->getUsername() );
-            $user->setActivationToken( $generator->generateToken(50) );
-
-
-            $profile->setUser($user);
-            $profile->setName( $dto->getName() );
-
-            $this->manager->persist($user);
-            $this->manager->persist($profile);
-            $this->manager->flush();
-
+        if( $errors = $formErrorsService->getFormErrors($profileForm, $userForm) ) {
             return $this->json([
-                'result' => 'success'
-            ],201);
+                'error' => $errors
+            ], 400);
+        }
+
+        $profile->setUser($user);
+        $user->setProfile($profile);
+
+        $this->manager->persist($user);
+        $this->manager->persist($profile);
+        $this->manager->flush();
+
+        $userCreateEvent = new UserCreateEvent($user);
+        $dispatcher->dispatch($userCreateEvent, $userCreateEvent::NAME);
+
+        return $this->json([
+            'result' => 'success'
+        ], 201);
+
+    }
+
+    /**
+     * @param User $user
+     * @return Response
+     * @Route ("/{id}", name="user_get_public_info", methods={"get"})
+     */
+    public function getUserPublicInfo(User $user): Response
+    {
+        try {
+            return $this->json( (new GetUserFullPublicInfoDTO($user))->toArray() );
         }catch (DTOException $e) {
             $this->logger->error($e->getTraceAsString());
 
@@ -115,44 +130,7 @@ class UserController extends AbstractController
 
             return $this->json([
                 'errors' => $message
-            ],400);
-        }
-    }
-
-    /**
-     * @param string $token
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     * @Route("/activate/{token}",name="user_activate", methods={"get"})
-     */
-    public function activate(string $token)
-    {
-        try {
-            $user = $this->repository->findForActivation($token);
-
-            $user->setActivationToken('');
-            $user->setActive(true);
-
-            $this->manager->persist($user);
-            $this->manager->flush();
-
-            return $this->json([
-                'result' => 'success'
-            ],200);
-
-        } catch (NonUniqueResultException $e) {
-            $this->logger->error('Activation token duplicate!');
-            $this->logger->error($e->getMessage());
-            return $this->json([
-                'errors' => [
-                    "Server error, please, try again or write to out administrator: {$this->getParameter('admin_email')}"
-                ]
-            ],500);
-        } catch (EntityNotFoundException $e) {
-            $this->logger->error("Activate user by token {$token}");
-            $this->logger->error($e->getMessage());
-            return $this->json([
-                'errors' => ["User not found. You can support our administrator: {$this->getParameter('admin_email')}"]
-            ],404);
+            ],$e->getCode());
         }
     }
 }

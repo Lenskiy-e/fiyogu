@@ -1,18 +1,25 @@
 security:
+    #enable_authenticator_manager: true
     encoders:
-        App\Entity\User: bcrypt
+        App\Entity\User:
+            algorithm: auto
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         database_users:
-            entity: { class: App\Entity\User, property: email }
+            entity: { class: App\Entity\User, property: session_token }
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+        auth:
             anonymous: true
-            lazy: true
-            pattern: ^/
+            pattern: ^/auth/
+        main:
+            pattern: ~
+            guard:
+                authenticators:
+                    - App\Security\TokenAuthenticator
+
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -23,5 +30,6 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+#         - { path: ^/admin, roles: ROLE_ADMIN }
+#         - { path: ^/user, roles: ROLE_USER }
+#        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -29,32 +31,38 @@ class User implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column (type="string", length=255)
+     * @Assert\Email()
+     * @Assert\Length(min="6", max="255")
      */
     private $email;
 
     /**
      * @ORM\Column (type="text")
+     * @Assert\Length(min="8")
+     * @Assert\NotBlank()
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=20)
+     * @Assert\NotBlank()
+     * @Assert\Length(min="3", max="20")
      */
     private $username;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $created_at;
+    private \DateTime $created_at;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\Profile", mappedBy="user", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="App\Entity\Profile", mappedBy="user", cascade={"persist", "remove"})
      */
-    private $profile;
+    private Profile $profile;
 
     /**
      * @ORM\Column (type="simple_array")
@@ -62,19 +70,19 @@ class User implements UserInterface
     private array $roles;
 
     /**
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", length=50, nullable=true, unique=true)
      * @Assert\Length(min="50", max="50")
      */
     private $session_token;
 
     /**
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", length=50, nullable=true, unique=true)
      * @Assert\Length(min="50", max="50")
      */
     private $activation_token;
 
     /**
-     * @ORM\Column(type="string", length=100, nullable=true)
+     * @ORM\Column(type="string", length=100, nullable=true, unique=true)
      * @Assert\Length(min="100", max="100")
      */
     private $recovery_token;
@@ -86,6 +94,19 @@ class User implements UserInterface
     private bool $active;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", length=50, unique=true, nullable=true)
+     */
+    private string $security_token;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="App\Entity\Skill", inversedBy="users")
+     * @ORM\JoinTable(name="user_skill")
+     */
+    private Collection $skills;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -93,6 +114,7 @@ class User implements UserInterface
         $this->created_at = new \DateTime();
         $this->roles = [self::ROLE_USER];
         $this->active = false;
+        $this->skills = new ArrayCollection();
     }
 
     /**
@@ -160,17 +182,17 @@ class User implements UserInterface
     }
 
     /**
-     * @return mixed
+     * @return Profile
      */
-    public function getProfile()
+    public function getProfile() : Profile
     {
         return $this->profile;
     }
 
     /**
-     * @param mixed $profile
+     * @param Profile $profile
      */
-    public function setProfile($profile): void
+    public function setProfile(Profile $profile): void
     {
         $this->profile = $profile;
     }
@@ -255,10 +277,26 @@ class User implements UserInterface
         $this->session_token = $session_token;
     }
 
-
-    public function getSalt()
+    /**
+     * @return ArrayCollection
+     */
+    public function getSkills(): Collection
     {
-        // TODO: Implement getSalt() method.
+        return $this->skills;
+    }
+
+    /**
+     * @param Collection $skills
+     */
+    public function setSkills(Collection $skills): void
+    {
+        $this->skills = $skills;
+    }
+
+
+    public function getSalt() : string
+    {
+        return 'sr6fe9fh.f0!';
     }
 
     public function eraseCredentials()

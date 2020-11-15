@@ -11,14 +11,20 @@ use Throwable;
 class DTOException extends \Exception
 {
     /**
+     * @var bool
+     */
+    public bool $array = false;
+
+    /**
      * DTOException constructor.
      * @param $message
      * @param int $code
      * @param bool $array
      */
-    public function __construct($message, int $code, bool $array = false)
+    public function __construct($message, int $code)
     {
-        if($array) {
+        if( is_array($message) ) {
+            $this->array = true;
             $message = json_encode($message);
         }
         parent::__construct($message,$code);

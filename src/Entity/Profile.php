@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProfileRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ProfileRepository::class)
@@ -18,12 +19,15 @@ class Profile
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="profile")
+     * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="profile", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=false)
      */
     private $user;
 
     /**
      * @ORM\Column(type="string", length=100)
+     * @Assert\NotBlank()
+     * @Assert\Length(min="2", max="100")
      */
     private $name;
 
@@ -119,7 +123,7 @@ class Profile
     /**
      * @return false
      */
-    public function getMentor()
+    public function isMentor() : bool
     {
         return $this->mentor;
     }
@@ -127,7 +131,7 @@ class Profile
     /**
      * @param false $mentor
      */
-    public function setMentor($mentor): void
+    public function setMentor(bool $mentor): void
     {
         $this->mentor = $mentor;
     }
