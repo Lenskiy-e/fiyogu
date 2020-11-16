@@ -107,6 +107,24 @@ class User implements UserInterface
     private Collection $skills;
 
     /**
+     * @var Collection
+     * @ORM\OneToMany(targetEntity="App\Entity\Testimonials", mappedBy="user_from")
+     */
+    private Collection $user_reviews;
+
+    /**
+     * @var Collection
+     * @ORM\OneToMany(targetEntity="App\Entity\Testimonials", mappedBy="user_to")
+     */
+    private Collection $testimonials;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", scale=2, precision=4)
+     */
+    private float $rating;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -293,6 +311,53 @@ class User implements UserInterface
         $this->skills = $skills;
     }
 
+    /**
+     * @return Collection
+     */
+    public function getUserReviews(): Collection
+    {
+        return $this->user_reviews;
+    }
+
+    /**
+     * @param Collection $user_reviews
+     */
+    public function setUserReviews(Collection $user_reviews): void
+    {
+        $this->user_reviews = $user_reviews;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getTestimonials(): Collection
+    {
+        return $this->testimonials;
+    }
+
+    /**
+     * @param Collection $testimonials
+     */
+    public function setTestimonials(Collection $testimonials): void
+    {
+        $this->testimonials = $testimonials;
+    }
+
+    /**
+     * @return float
+     */
+    public function getRating(): float
+    {
+        return $this->rating;
+    }
+
+    /**
+     * @param float $rating
+     */
+    public function setRating(float $rating): void
+    {
+        $this->rating = $rating;
+    }
 
     public function getSalt() : string
     {

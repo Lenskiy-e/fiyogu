@@ -4,18 +4,11 @@ namespace App\Controller;
 
 use App\DTO\DTOException;
 use App\DTO\User\GetUserFullPublicInfoDTO;
-use App\Entity\Profile;
 use App\Entity\User;
-use App\Event\UserCreateEvent;
-use App\Form\CreateProfileType;
-use App\Form\CreateUserType;
 use App\Repository\UserRepository;
-use App\Services\FormErrors;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -64,52 +57,6 @@ class UserController extends AbstractController
         $this->logger = $logger;
         $this->manager = $manager;
     }
-
-    /**
-     * @param Request $request
-     * @param EventDispatcherInterface $dispatcher
-     * @param FormErrors $formErrorsService
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     * @Route ("/create", name="user_create", methods={"POST"})
-     */
-    public function create
-    (
-        Request $request,
-        EventDispatcherInterface $dispatcher,
-        FormErrors $formErrorsService
-    )
-    {
-        $data = json_decode($request->getContent(),true);
-        $user = new User();
-        $profile = new Profile();
-
-        $userForm = $this->createForm(CreateUserType::class, $user);
-        $profileForm = $this->createForm(CreateProfileType::class, $profile);
-        $userForm->submit($data);
-        $profileForm->submit($data);
-
-        if( $errors = $formErrorsService->getFormErrors($profileForm, $userForm) ) {
-            return $this->json([
-                'error' => $errors
-            ], 400);
-        }
-
-        $profile->setUser($user);
-        $user->setProfile($profile);
-
-        $this->manager->persist($user);
-        $this->manager->persist($profile);
-        $this->manager->flush();
-
-        $userCreateEvent = new UserCreateEvent($user);
-        $dispatcher->dispatch($userCreateEvent, $userCreateEvent::NAME);
-
-        return $this->json([
-            'result' => 'success'
-        ], 201);
-
-    }
-
     /**
      * @param User $user
      * @return Response

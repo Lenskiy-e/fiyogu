@@ -15,7 +15,9 @@ security:
             anonymous: true
             pattern: ^/auth/
         main:
-            pattern: ~
+            anonymous: false
+            stateless: true
+            pattern: /
             guard:
                 authenticators:
                     - App\Security\TokenAuthenticator
