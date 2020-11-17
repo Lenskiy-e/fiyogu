@@ -22,7 +22,7 @@ class SkillRepository extends ServiceEntityRepository
     public function getUsers(int $id, int $limit, int $offset)
     {
         if($offset > 0) {
-            $offset = $offset * $limit;
+            $offset *= $limit;
         }
 
         $query = $this->createQueryBuilder('s')

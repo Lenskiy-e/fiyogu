@@ -47,6 +47,17 @@ class Testimonials
     private UserInterface $user_from;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean")
+     */
+    private bool $verified;
+
+    public function __construct()
+    {
+        $this->verified = false;
+    }
+
+    /**
      * @return int|null
      */
     public function getId(): ?int
@@ -118,5 +129,19 @@ class Testimonials
         $this->user_from = $user_from;
     }
 
+    /**
+     * @return bool
+     */
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
 
+    /**
+     * @param bool $verified
+     */
+    public function setVerified(bool $verified): void
+    {
+        $this->verified = $verified;
+    }
 }

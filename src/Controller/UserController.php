@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\DTO\DTOException;
 use App\DTO\User\GetUserFullPublicInfoDTO;
 use App\Entity\User;
+use App\Repository\TestimonialsRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -79,5 +81,23 @@ class UserController extends AbstractController
                 'errors' => $message
             ],$e->getCode());
         }
+    }
+
+    /**
+     * @param int $id
+     * @param Request $request
+     * @param TestimonialsRepository $testimonialsRepository
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @Route("/{id}/testimonials", name="user_get_testimonials", methods={"get"})
+     */
+    public function getTestimonials(int $id, Request $request,TestimonialsRepository $testimonialsRepository) : Response
+    {
+        $requestData = json_decode($request->getContent(),true);
+        $limit = $requestData['limit'] ?? 20;
+        $offset = $requestData['offset'] ?? 0;
+
+        return $this->json([
+            'result' => $testimonialsRepository->findByUserTo($id, $limit, $offset)
+        ],200);
     }
 }
