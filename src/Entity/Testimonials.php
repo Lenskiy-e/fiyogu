@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\TestimonialsRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -13,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="testimonials", uniqueConstraints={
  *     @ORM\UniqueConstraint(name="user_from_to", columns={"user_from_id", "user_to_id"})
  * })
+ * @ORM\HasLifecycleCallbacks()
  */
 class Testimonials
 {

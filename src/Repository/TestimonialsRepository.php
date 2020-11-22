@@ -48,4 +48,16 @@ class TestimonialsRepository extends ServiceEntityRepository
 
         return $query->getArrayResult();
     }
+
+    public function getRating(int $user_id) : array
+    {
+        $query = $this->createQueryBuilder('t')
+            ->select('SUM(t.rating) as sum, count(t.id) as count')
+            ->where('t.user_to = :id')
+            ->andWhere('t.verified = 1')
+            ->setParameter('id', $user_id)
+            ->getQuery()
+            ->getResult();
+        return $query[0];
+    }
 }

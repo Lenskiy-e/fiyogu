@@ -17,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class ProfileController
  * @package App\Controller
  * @Route ("/profile")
- * @Security("is_granted('ROLE_USER')")
  */
 class ProfileController extends AbstractController
 {
@@ -44,7 +43,7 @@ class ProfileController extends AbstractController
      * @param Profile $profile
      * @param Request $request
      * @return Response
-     * @Route ("/{id}/update", name="update_profile", methods={"patch"})
+     * @Route ("/{id}", name="update_profile", methods={"patch"})
      */
     public function update
     (

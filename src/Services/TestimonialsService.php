@@ -76,6 +76,15 @@ class TestimonialsService
         $this->commit($review);
     }
 
+    public function delete(Testimonials $testimonial, UserInterface $user) : void
+    {
+        if( $testimonial->getUserFrom() !== $user ) {
+            throw new BadRequestException('You need to be testimonial maintainer to delete it',403);
+        }
+        $this->entityManager->remove($testimonial);
+        $this->entityManager->flush();
+    }
+
     /**
      * @param array $data
      * @param Testimonials|null $testimonial

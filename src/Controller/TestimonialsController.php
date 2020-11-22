@@ -82,4 +82,23 @@ class TestimonialsController extends AbstractController
             ], $e->getCode());
         }
     }
+
+    /**
+     * @param Testimonials $testimonial
+     * @return Response
+     * @Route ("/{id}", name="testimonials_delete", methods={"delete"})
+     */
+    public function delete(Testimonials $testimonial) : Response
+    {
+        try {
+            $this->testimonialsService->delete($testimonial,$this->getUser());
+            return $this->json([
+                'status' => 'success'
+            ],200);
+        }catch (BadRequestException $e) {
+            return $this->json([
+                'error' => $e->getMessage()
+            ], $e->getCode());
+        }
+    }
 }

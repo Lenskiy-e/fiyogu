@@ -24,6 +24,11 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * @param string $token
+     * @return User|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function findForActivation(string $token) : ?User
     {
         return $this->createQueryBuilder('u')
@@ -34,6 +39,10 @@ class UserRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * @param int $skill_id
+     * @return int|mixed|string
+     */
     public function getUsersWithSkill(int $skill_id)
     {
         $query = $this->createQueryBuilder('u')
