@@ -133,6 +133,7 @@ class User implements UserInterface
         $this->roles = [self::ROLE_USER];
         $this->active = false;
         $this->skills = new ArrayCollection();
+        $this->rating = 0;
     }
 
     /**
