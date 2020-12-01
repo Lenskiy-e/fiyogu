@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -55,32 +54,20 @@ class UserRepository extends ServiceEntityRepository
         return $query;
     }
 
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function getUsersWithTestimonials(int $min_count = 1, int $limit = 20, int $offset = 0)
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        if($offset > 0) {
+            $offset *= $limit;
+        }
 
-    /*
-    public function findOneBySomeField($value): ?User
-    {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('u.testimonials', 't')
+            ->groupBy('u')
+            ->having('count(t.id) > :count')
+            ->setParameter('count', $min_count)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
 }
