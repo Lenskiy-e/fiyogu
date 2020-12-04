@@ -51,14 +51,22 @@ class ProfileController extends AbstractController
         Request $request
     ) : Response
     {
-        $data = json_decode($request->getContent(),true);
-        $form = $this->createForm(UpdateProfileType::class, $profile);
-        $form->submit($data);
+        try {
+            $data = json_decode($request->getContent(),true);
+            $form = $this->createForm(UpdateProfileType::class, $profile);
+            $form->submit($data);
 
-        $this->manager->persist($profile);
-        $this->manager->flush();
-        return $this->json([
-            'result' => 'success'
-        ], 200);
+            $this->manager->persist($profile);
+            $this->manager->flush();
+            return $this->json([
+                'result' => 'success'
+            ], 200);
+        }catch(\Exception $e) {
+            $this->logger->error($e->getTraceAsString());
+
+            return $this->json([
+                'errors' => $e->getMessage()
+            ],$e->getCode());
+        }
     }
 }
