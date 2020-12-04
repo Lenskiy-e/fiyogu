@@ -84,20 +84,28 @@ class UserController extends AbstractController
     }
 
     /**
-     * @param int $id
+     * @param User $user
      * @param Request $request
      * @param TestimonialsRepository $testimonialsRepository
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @Route("/{id}/testimonials", name="user_get_testimonials", methods={"get"})
      */
-    public function getTestimonials(int $id, Request $request,TestimonialsRepository $testimonialsRepository) : Response
+    public function getTestimonials(User $user, Request $request,TestimonialsRepository $testimonialsRepository) : Response
     {
-        $requestData = json_decode($request->getContent(),true);
-        $limit = $requestData['limit'] ?? 20;
-        $offset = $requestData['offset'] ?? 0;
+        try {
+            $requestData = json_decode($request->getContent(),true);
+            $limit = $requestData['limit'] ?? 20;
+            $offset = $requestData['offset'] ?? 0;
 
-        return $this->json([
-            'result' => $testimonialsRepository->findByUserTo($id, $limit, $offset)
-        ],200);
+            return $this->json([
+                'result' => $testimonialsRepository->findByUserTo($user->getId(), $limit, $offset)
+            ],200);
+        }catch (\Exception $e) {
+            $this->logger->error($e->getTraceAsString());
+
+            return $this->json([
+                'errors' => $e->getMessage()
+            ],$e->getCode());
+        }
     }
 }

@@ -90,14 +90,14 @@ class UserControllerTest extends KernelTestCase
     public function testGetTestimonialsIsJsonResponse()
     {
         $user = $this->getUser(true);
-        $response = $this->getTestimonials($user->getId());
+        $response = $this->getTestimonials($user);
         $this->assertInstanceOf(JsonResponse::class, $response,'Function doesn\'t return json response!');
     }
 
     public function testGetTestimonialsContainsAllTestimonials()
     {
         $user = $this->getUser(true);
-        $response = $this->getTestimonials($user->getId())->getContent();
+        $response = $this->getTestimonials($user)->getContent();
         $user_testimonials = $this->testimonialsRepository->findBy([
             'user_to'   => $user,
             'verified'  => true
@@ -111,7 +111,7 @@ class UserControllerTest extends KernelTestCase
     public function testGetTestimonialsNotContainsUnverifiedTestimonials()
     {
         $user = $this->getUser(true);
-        $response = $this->getTestimonials($user->getId())->getContent();
+        $response = $this->getTestimonials($user)->getContent();
         $user_testimonials = $this->testimonialsRepository->findBy([
             'user_to'   => $user,
             'verified'  => false
@@ -135,9 +135,9 @@ class UserControllerTest extends KernelTestCase
         return $users[0];
     }
 
-    private function getTestimonials(int $id) {
+    private function getTestimonials(User $user) {
         return $this->userController->getTestimonials(
-            $id,
+            $user,
             $this->getMockBuilder(Request::class)->getMock(),
             $this->testimonialsRepository
         );

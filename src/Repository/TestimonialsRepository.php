@@ -38,7 +38,7 @@ class TestimonialsRepository extends ServiceEntityRepository
         }
         $query = $this->createQueryBuilder('t')
             ->innerJoin(Profile::class,'p', Join::WITH, 'p.user = t.user_from')
-            ->select('identity(t.user_from), (p.name) as from_name, t.text, t.rating')
+            ->select('identity(t.user_from) as user_from, (p.name) as from_name, t.text, t.rating')
             ->where('t.user_to = :user_id')
             ->andWhere('t.verified = 1')
             ->setParameter('user_id', $user_id)
