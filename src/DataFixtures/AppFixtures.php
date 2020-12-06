@@ -69,7 +69,7 @@ class AppFixtures extends Fixture
             $active = rand(0,1);
 
             $user->setEmail($faker->freeEmail());
-            $user->setPassword($this->encoder->encodePassword($user,'k.,f1321'));
+            $user->setPassword($this->encoder->encodePassword($user,'111111'));
             $user->setUsername($faker->userName());
             if($active) {
                 $user->setActive(true);

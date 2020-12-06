@@ -72,16 +72,4 @@ class ProfileControllerTest extends WebTestCase
 
         return $users[0];
     }
-
-    private function returnState(Profile $profile)
-    {
-        $newProfile = $this->profileRepository->find($profile->getId());
-
-        $newProfile->setSurname( $profile->getSurname() );
-        $newProfile->setMentor( $profile->isMentor() );
-        $newProfile->setPhone( $profile->getPhone() );
-
-        $this->entityManager->persist($newProfile);
-        $this->entityManager->flush();
-    }
 }
