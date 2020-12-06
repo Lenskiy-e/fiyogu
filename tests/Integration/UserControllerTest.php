@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Controllers\Functional;
+namespace App\Tests\Integration;
 
 use App\Controller\UserController;
 use App\Entity\Testimonials;

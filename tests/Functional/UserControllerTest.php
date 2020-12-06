@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Controllers\Integration;
+namespace App\Tests\Functional;
 
 use App\Entity\User;
 use Monolog\Logger;

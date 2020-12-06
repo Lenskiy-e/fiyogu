@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Controllers\Functional;
+namespace App\Tests\Integration;
 
 use App\Controller\ProfileController;
 use App\Entity\Profile;
@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class ProfileControllerTest extends KernelTestCase
@@ -53,7 +54,16 @@ class ProfileControllerTest extends KernelTestCase
     public function testUpdateReturnJson()
     {
         $profile = $this->getUser()->getProfile();
+
+        $response = $this->profileController->update($profile, new Request());
+        $this->assertInstanceOf(JsonResponse::class, $response);
+    }
+
+    public function testUpdateChangeData()
+    {
+        $profile = $this->getUser()->getProfile();
         $oldProfile = clone $profile;
+
         $surname = "New {$profile->getSurname()}";
         $phone = "{$profile->getPhone()}00";
 
@@ -65,11 +75,23 @@ class ProfileControllerTest extends KernelTestCase
 
         $this->profileController->update($profile, $request);
 
-        $this->assertEquals($surname, $profile->getSurname(), "Surname doesn't correct");
+        $this->assertEquals(trim($surname), $profile->getSurname(), "Surname doesn't correct");
         $this->assertEquals($phone, $profile->getPhone(), "Phone doesn't correct");
         $this->assertEquals(!$oldProfile->isMentor(), $profile->isMentor(), "Mentor doesn't correct");
 
         $this->returnState($oldProfile);
+    }
+
+    public function testUpdateNotChangeName()
+    {
+        $profile = $this->getUser()->getProfile();
+
+        $request = new Request([],[],[],[],[],[],json_encode([
+            'name'     => 'Non existing name'
+        ]));
+
+        $this->profileController->update($profile, $request);
+        $this->assertNotEquals('Non existing name', $profile->getName(), 'Request change the name!');
     }
 
     private function getUser() : User
