@@ -96,11 +96,9 @@ class ProfileControllerTest extends KernelTestCase
 
     private function getUser() : User
     {
-        $users = $this->userRepository->findBy([
+        return $this->userRepository->findOneBy([
             'active' => true,
-        ], null, 1);
-
-        return $users[0];
+        ]);
     }
 
     private function returnState(Profile $profile)

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace App\Controller;
 
-use App\Entity\Skill;
+use App\DTO\User\GetUserFullPublicInfoDTO;
 use App\Repository\SkillRepository;
 use App\Repository\UserRepository;
 use App\Services\AddSkill;
@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use \Exception;
 
 /**
  * Class SkillController
@@ -57,21 +58,32 @@ class SkillController extends AbstractController
             ],400);
         }
     }
-
+    
     /**
      * @param int $id
+     * @param Request $request
      * @return Response
      * @Route("/{id}/users", name="skill_get_users", methods={"get"})
      */
     public function getSkillUsers(int $id, Request $request): Response
     {
-        $data = json_decode($request->getContent(),true);
-        $limit = $data['limit'] ?? 20;
-        $offset = $data['offset'] ?? 0;
-
-        $users = $this->skillRepository->getUsers($id,$limit,$offset);
-        return $this->json([
-            'users' => $users
-        ],200);
+        try {
+            $users = [];
+            $data = json_decode($request->getContent(),true);
+            $limit = $data['limit'] ?? 20;
+            $offset = $data['offset'] ?? 0;
+            $mentor = $data['mentor'] ?? 0;
+    
+            foreach ($this->skillRepository->getUsers($id,$limit,$offset,(bool)$mentor) as $user) {
+                $users[] = (new GetUserFullPublicInfoDTO($user))->toArray();
+            }
+            return $this->json([
+                'users' => $users
+            ],200);
+        }catch (Exception $e) {
+            return $this->json([
+                'error' => $e->getMessage()
+            ],400);
+        }
     }
 }

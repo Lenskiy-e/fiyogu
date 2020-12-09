@@ -71,10 +71,8 @@ class SecurityControllerTest extends KernelTestCase
 
     private function getUser(bool $active = true) : User
     {
-        $users = $this->userRepository->findBy([
+        return $this->userRepository->findOneBy([
             'active' => $active
-        ],null,1);
-
-        return $users[0];
+        ]);
     }
 }

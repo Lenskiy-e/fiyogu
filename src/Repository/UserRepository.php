@@ -53,7 +53,13 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
         return $query;
     }
-
+    
+    /**
+     * @param int $min_count
+     * @param int $limit
+     * @param int $offset
+     * @return int|mixed|string
+     */
     public function getUsersWithTestimonials(int $min_count = 1, int $limit = 20, int $offset = 0)
     {
         if($offset > 0) {

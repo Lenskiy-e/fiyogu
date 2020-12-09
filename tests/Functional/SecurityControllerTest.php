@@ -30,11 +30,9 @@ class SecurityControllerTest extends WebTestCase
 
     private function getUser(bool $active = true) : User
     {
-        $users = $this->userRepository->findBy([
+        return $this->userRepository->findOneBy([
             'active' => $active
-        ],null,1);
-
-        return $users[0];
+        ]);
     }
 
     /**
@@ -48,7 +46,7 @@ class SecurityControllerTest extends WebTestCase
 
         $client->request('POST', '/auth/login', [], [], [], json_encode([
             'email'     => $user->getEmail(),
-            'password'  => 'k.,f1321'
+            'password'  => '111111'
         ]));
         $status = $client->getResponse()->getStatusCode();
 
@@ -60,7 +58,7 @@ class SecurityControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('POST', '/auth/login', [], [], [], json_encode([
             'email'     => $this->getUser()->getEmail(),
-            'password'  => 'k.,f1321'
+            'password'  => '111111'
         ]));
 
         $this->assertContains('token', $client->getResponse()->getContent(),'Response doesn\'t have token');

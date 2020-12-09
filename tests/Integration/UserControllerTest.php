@@ -126,13 +126,12 @@ class UserControllerTest extends KernelTestCase
     {
         if($with_testimonials) {
             $users = $this->userRepository->getUsersWithTestimonials(1,1,0);
-        }else{
-            $users = $this->userRepository->findBy([
-                'active' => true,
-            ], null, 1);
+            return $users[0];
         }
-
-        return $users[0];
+        
+        return $this->userRepository->findOneBy([
+            'active' => true,
+        ]);
     }
 
     private function getTestimonials(User $user) {

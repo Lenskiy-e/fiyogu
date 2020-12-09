@@ -66,10 +66,8 @@ class ProfileControllerTest extends WebTestCase
 
     private function getUser() : User
     {
-        $users = $this->userRepository->findBy([
+        return $this->userRepository->findOneBy([
             'active' => true,
-        ], null, 1);
-
-        return $users[0];
+        ]);
     }
 }
