@@ -76,4 +76,19 @@ class UserRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    
+    public function getMentors(int $limit = 20, int $offset = 0)
+    {
+        if($offset > 0) {
+            $offset *= $limit;
+        }
+        return $this->createQueryBuilder('u')
+            ->innerJoin('u.profile', 'p')
+            ->where('u.active = 1')
+            ->where('p.mentor = 1')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+    }
 }

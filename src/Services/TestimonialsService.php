@@ -50,6 +50,10 @@ class TestimonialsService
      */
     public function create(UserInterface $user, UserInterface $currentUser, Request $request) : void
     {
+        if($user === $currentUser) {
+            throw new BadRequestException('Forbidden to write testimonials for yourself',403);
+        }
+        
         if( !$user->getProfile()->isMentor() ) {
             throw new BadRequestException('Only mentor can have a review',403);
         }

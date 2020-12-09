@@ -5,7 +5,6 @@ namespace App\Tests\Functional;
 use App\Entity\Skill;
 use App\Entity\User;
 use App\Repository\SkillRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -16,16 +15,18 @@ class SkillControllerTest extends WebTestCase
     
     /** @var SkillRepository $skillRepository  */
     private SkillRepository $skillRepository;
-    
-    /** @var UserRepository $userRepository  */
-    private UserRepository $userRepository;
+    /**
+     * @var User
+     */
+    private $user;
     
     protected function setUp()
     {
         self::bootKernel();
         $this->entityManager = self::$kernel->getContainer()->get('doctrine')->getManager();
         $this->skillRepository = $this->entityManager->getRepository(Skill::class);
-        $this->userRepository = $this->entityManager->getRepository(User::class);
+        $userRepository = $this->entityManager->getRepository(User::class);
+        $this->user = $userRepository->findOneBy(['active' => true]);
         self::ensureKernelShutdown();
     }
     
@@ -37,11 +38,10 @@ class SkillControllerTest extends WebTestCase
     public function testAddReturnSuccessStatus()
     {
         $client = static::createClient();
-        $user = $this->getUser();
     
         $client->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -54,11 +54,10 @@ class SkillControllerTest extends WebTestCase
     public function testAddReturnSuccessJson()
     {
         $client = static::createClient();
-        $user = $this->getUser();
     
         $client->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -76,11 +75,10 @@ class SkillControllerTest extends WebTestCase
         $originalClient = static::createClient();
         self::ensureKernelShutdown();
         $duplicateClient = static::createClient();
-        $user = $this->getUser();
     
         $originalClient->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -89,7 +87,7 @@ class SkillControllerTest extends WebTestCase
     
         $duplicateClient->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -106,11 +104,10 @@ class SkillControllerTest extends WebTestCase
         $originalClient = static::createClient();
         self::ensureKernelShutdown();
         $duplicateClient = static::createClient();
-        $user = $this->getUser();
     
         $originalClient->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -119,7 +116,7 @@ class SkillControllerTest extends WebTestCase
     
         $duplicateClient->request('POST', "/skill/add",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ],
             json_encode([
                 'name' => 'skillByPHPUnit'
@@ -132,12 +129,11 @@ class SkillControllerTest extends WebTestCase
     public function testGetSkillUsersReturnSuccessStatus()
     {
         $client = static::createClient();
-        $user = $this->getUser();
         $skill = $this->getSkill();
     
         $client->request('GET', "/skill/{$skill->getId()}/users",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ]
         );
         
@@ -147,12 +143,11 @@ class SkillControllerTest extends WebTestCase
     public function testGetSkillUsersContainsUsers()
     {
         $client = static::createClient();
-        $user = $this->getUser();
         $skill = $this->getSkill();
     
         $client->request('GET', "/skill/{$skill->getId()}/users",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ]
         );
         
@@ -162,12 +157,11 @@ class SkillControllerTest extends WebTestCase
     public function testGetSkillUsersCountOfReturnedUsers()
     {
         $client = static::createClient();
-        $user = $this->getUser();
         $skill = $this->getSkill();
     
         $client->request('GET', "/skill/{$skill->getId()}/users",[],[],
             [
-                'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
             ]
         );
         $response = json_decode($client->getResponse()->getContent(),true);
@@ -179,7 +173,7 @@ class SkillControllerTest extends WebTestCase
             $newClient = static::createClient();
             $newClient->request('GET', "/skill/{$skill->getId()}/users",[],[],
                 [
-                    'HTTP_X-AUTH-TOKEN' => "{$user->getSessionToken()}"
+                    'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
                 ],
                 json_encode([
                     'limit' => $newCount
@@ -200,13 +194,6 @@ class SkillControllerTest extends WebTestCase
             $this->entityManager->remove($skill);
             $this->entityManager->flush();
         }
-    }
-    
-    private function getUser() : User
-    {
-        return $this->userRepository->findOneBy([
-            'active' => true,
-        ]);
     }
     
     private function getSkill() : Skill

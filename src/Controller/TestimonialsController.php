@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Testimonials;
 use App\Entity\User;
-use App\Form\TestimonialType;
 use App\Services\FormErrors;
 use App\Services\TestimonialsService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -22,7 +21,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TestimonialsController extends AbstractController
 {
-
     /**
      * @var EntityManagerInterface
      */

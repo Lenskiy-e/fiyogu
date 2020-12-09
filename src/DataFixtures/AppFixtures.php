@@ -143,9 +143,12 @@ class AppFixtures extends Fixture
         $reviews = $repository->findAll();
 
         foreach ($reviews as $review) {
-            $review->setVerified(true);
-            $manager->persist($review);
-            $manager->flush();
+            if(rand(0,1)) {
+                $review->setVerified(true);
+                $manager->persist($review);
+                $manager->flush();
+            }
+            
         }
 
     }

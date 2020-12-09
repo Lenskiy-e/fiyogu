@@ -30,6 +30,9 @@ class ProfileControllerTest extends KernelTestCase
 
     /** @var ProfileRepository $profileRepository */
     private ProfileRepository $profileRepository;
+    
+    /** @var User $user  */
+    private $user;
 
     protected function setUp()
     {
@@ -49,11 +52,15 @@ class ProfileControllerTest extends KernelTestCase
         $this->profileController = new ProfileController($loggerInterface, $this->entityManager);
 
         $this->profileController->setContainer(self::$kernel->getContainer());
+        
+        $this->user = $this->userRepository->findOneBy([
+            'active' => true,
+        ]);
     }
 
     public function testUpdateReturnJson()
     {
-        $profile = $this->getUser()->getProfile();
+        $profile = $this->user->getProfile();
 
         $response = $this->profileController->update($profile, new Request());
         $this->assertInstanceOf(JsonResponse::class, $response);
@@ -61,7 +68,7 @@ class ProfileControllerTest extends KernelTestCase
 
     public function testUpdateChangeData()
     {
-        $profile = $this->getUser()->getProfile();
+        $profile = $this->user->getProfile();
         $oldProfile = clone $profile;
 
         $surname = "New {$profile->getSurname()}";
@@ -84,7 +91,7 @@ class ProfileControllerTest extends KernelTestCase
 
     public function testUpdateNotChangeName()
     {
-        $profile = $this->getUser()->getProfile();
+        $profile = $this->user->getProfile();
 
         $request = new Request([],[],[],[],[],[],json_encode([
             'name'     => 'Non existing name'
@@ -92,13 +99,6 @@ class ProfileControllerTest extends KernelTestCase
 
         $this->profileController->update($profile, $request);
         $this->assertNotEquals('Non existing name', $profile->getName(), 'Request change the name!');
-    }
-
-    private function getUser() : User
-    {
-        return $this->userRepository->findOneBy([
-            'active' => true,
-        ]);
     }
 
     private function returnState(Profile $profile)

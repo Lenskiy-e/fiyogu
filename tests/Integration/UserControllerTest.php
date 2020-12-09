@@ -17,9 +17,26 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserControllerTest extends KernelTestCase
 {
+    /**
+     * @var UserController
+     */
     private UserController $userController;
+    /**
+     * @var UserRepository|\Doctrine\Persistence\ObjectRepository
+     */
     private UserRepository $userRepository;
+    /**
+     * @var TestimonialsRepository|\Doctrine\Persistence\ObjectRepository
+     */
     private TestimonialsRepository $testimonialsRepository;
+    /**
+     * @var User
+     */
+    private User $user;
+    /**
+     * @var User
+     */
+    private User  $user_with_testimonials;
 
     protected function setUp()
     {
@@ -48,25 +65,26 @@ class UserControllerTest extends KernelTestCase
         );
 
         $this->userController->setContainer($kernel->getContainer());
+        
+        $this->user = $this->getUser();
+        $this->user_with_testimonials = $this->getUser(true);
     }
 
     public function testGetUserPublicInfoIsJsonResponse()
     {
-        $user = $this->getUser();
-        $userInfo = $this->userController->getUserPublicInfo($user);
+        $userInfo = $this->userController->getUserPublicInfo($this->user);
 
         $this->assertInstanceOf(Response::class, $userInfo, 'Function doesn\'t return json response!');
     }
 
     public function testGetUserPublicInfoHasFields()
     {
-        $user = $this->getUser();
-        $userInfoContent = $this->userController->getUserPublicInfo($user)->getContent();
-        $profile = $user->getProfile();
+        $userInfoContent = $this->userController->getUserPublicInfo($this->user)->getContent();
+        $profile = $this->user->getProfile();
 
-        $this->assertContains($user->getEmail(), $userInfoContent, 'Response doesn\'t contains user Email!');
-        $this->assertContains($user->getUsername(), $userInfoContent, 'Response doesn\'t contains user Username!');
-        $this->assertContains($user->getCreatedAt()->format("d.m.Y"), $userInfoContent, 'Response doesn\'t contains user Created at date!');
+        $this->assertContains($this->user->getEmail(), $userInfoContent, 'Response doesn\'t contains user Email!');
+        $this->assertContains($this->user->getUsername(), $userInfoContent, 'Response doesn\'t contains user Username!');
+        $this->assertContains($this->user->getCreatedAt()->format("d.m.Y"), $userInfoContent, 'Response doesn\'t contains user Created at date!');
         $this->assertContains($profile->getName(), $userInfoContent, 'Response doesn\'t contains user Name!');
         $this->assertContains($profile->getSurname(), $userInfoContent, 'Response doesn\'t contains user Surname!');
         $this->assertContains($profile->getPhone(), $userInfoContent, 'Response doesn\'t contains user Phone!');
@@ -80,26 +98,23 @@ class UserControllerTest extends KernelTestCase
 
     public function testGetUserPublicInfoHasNoField()
     {
-        $user = $this->getUser();
-        $userInfoContent = $this->userController->getUserPublicInfo($user)->getContent();
+        $userInfoContent = $this->userController->getUserPublicInfo($this->user)->getContent();
 
-        $this->assertNotContains($user->getPassword(), $userInfoContent, 'Response contains a user Password!');
-        $this->assertNotContains($user->getSessionToken(), $userInfoContent, 'Response contains a user Session Token!');
+        $this->assertNotContains($this->user->getPassword(), $userInfoContent, 'Response contains a user Password!');
+        $this->assertNotContains($this->user->getSessionToken(), $userInfoContent, 'Response contains a user Session Token!');
     }
 
     public function testGetTestimonialsIsJsonResponse()
     {
-        $user = $this->getUser(true);
-        $response = $this->getTestimonials($user);
+        $response = $this->getTestimonials($this->user_with_testimonials);
         $this->assertInstanceOf(JsonResponse::class, $response,'Function doesn\'t return json response!');
     }
 
     public function testGetTestimonialsContainsAllTestimonials()
     {
-        $user = $this->getUser(true);
-        $response = $this->getTestimonials($user)->getContent();
+        $response = $this->getTestimonials($this->user_with_testimonials)->getContent();
         $user_testimonials = $this->testimonialsRepository->findBy([
-            'user_to'   => $user,
+            'user_to'   => $this->user_with_testimonials,
             'verified'  => true
         ]);
 
@@ -110,10 +125,9 @@ class UserControllerTest extends KernelTestCase
 
     public function testGetTestimonialsNotContainsUnverifiedTestimonials()
     {
-        $user = $this->getUser(true);
-        $response = $this->getTestimonials($user)->getContent();
+        $response = $this->getTestimonials($this->user_with_testimonials)->getContent();
         $user_testimonials = $this->testimonialsRepository->findBy([
-            'user_to'   => $user,
+            'user_to'   => $this->user_with_testimonials,
             'verified'  => false
         ]);
 

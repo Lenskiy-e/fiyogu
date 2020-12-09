@@ -16,15 +16,21 @@ class SecurityControllerTest extends WebTestCase
 
     /** @var EntityManagerInterface $entityManager */
     private EntityManagerInterface $entityManager;
+    
+    /** @var User */
+    private User $active_user;
+    
+    /** @var User */
+    private User $nonactive_user;
 
     protected function setUp()
     {
         self::bootKernel();
-
         /** @var EntityManagerInterface $entityManager */
         $this->entityManager = self::$kernel->getContainer()->get('doctrine')->getManager();
-
         $this->userRepository = $this->entityManager->getRepository(User::class);
+        $this->active_user = $this->getUser();
+        $this->nonactive_user = $this->getUser(false);
         self::ensureKernelShutdown();
     }
 
@@ -42,10 +48,9 @@ class SecurityControllerTest extends WebTestCase
     public function testLoginReturnSuccessResponse()
     {
         $client = static::createClient();
-        $user = $this->getUser();
 
         $client->request('POST', '/auth/login', [], [], [], json_encode([
-            'email'     => $user->getEmail(),
+            'email'     => $this->active_user->getEmail(),
             'password'  => '111111'
         ]));
         $status = $client->getResponse()->getStatusCode();
@@ -57,7 +62,7 @@ class SecurityControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/auth/login', [], [], [], json_encode([
-            'email'     => $this->getUser()->getEmail(),
+            'email'     => $this->active_user->getEmail(),
             'password'  => '111111'
         ]));
 
@@ -81,7 +86,7 @@ class SecurityControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/auth/login', [], [], [], json_encode([
-            'email'     => $this->getUser()->getEmail(),
+            'email'     => $this->active_user->getEmail(),
             'password'  => '123123'
         ]));
 
@@ -156,12 +161,11 @@ class SecurityControllerTest extends WebTestCase
 
     public function testRegisterValidateDuplicateData()
     {
-        $user = $this->getUser();
         $request = [
-            'email'       => $user->getEmail(),
+            'email'       => $this->active_user->getEmail(),
             'password'    => '111111111',
             'name'        => 'PhpUnit',
-            'username'    => $user->getUsername()
+            'username'    => $this->active_user->getUsername()
         ];
 
         $client = static::createClient();
@@ -176,10 +180,8 @@ class SecurityControllerTest extends WebTestCase
 
     public function testActivateReturnSuccessStatus()
     {
-        $user = $this->getUser(false);
-
         $client = static::createClient();
-        $client->request('GET', "/auth/activate/{$user->getActivationToken()}");
+        $client->request('GET', "/auth/activate/{$this->nonactive_user->getActivationToken()}");
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Expected 200 status code');
 
@@ -187,10 +189,8 @@ class SecurityControllerTest extends WebTestCase
 
     public function testActivateReturnSuccessJson()
     {
-        $user = $this->getUser(false);
-
         $client = static::createClient();
-        $client->request('GET', "/auth/activate/{$user->getActivationToken()}");
+        $client->request('GET', "/auth/activate/{$this->nonactive_user->getActivationToken()}");
 
         $this->assertContains(json_encode(['result' => 'success']),$client->getResponse()->getContent());
 
