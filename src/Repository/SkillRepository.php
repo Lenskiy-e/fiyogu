@@ -53,6 +53,7 @@ class SkillRepository extends ServiceEntityRepository
      */
     public function getUsers(int $id, int $limit, int $offset, bool $mentor)
     {
+        sleep(5);
         if($offset > 0) {
             $offset *= $limit;
         }

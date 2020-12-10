@@ -31,9 +31,6 @@ class UserTestimonialsSubscriber implements EventSubscriber
      */
     public function postUpdate(LifecycleEventArgs $args)
     {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $args->getEntityManager();
-
         /** @var Testimonials $testimonial */
         $entity = $args->getEntity();
 
@@ -47,9 +44,6 @@ class UserTestimonialsSubscriber implements EventSubscriber
      */
     public function postRemove(LifecycleEventArgs $args)
     {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $args->getEntityManager();
-
         /** @var Testimonials $testimonial */
         $entity = $args->getEntity();
 
@@ -61,7 +55,7 @@ class UserTestimonialsSubscriber implements EventSubscriber
     /**
      * @return array|string[]
      */
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             Events::postUpdate,

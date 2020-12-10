@@ -19,11 +19,10 @@ class UserCreateEvent extends Event
      * @var User
      */
     private User $user;
-
+    
     /**
      * UserCreateEvent constructor.
      * @param User $user
-     * @param string $name
      */
     public function __construct(User $user)
     {

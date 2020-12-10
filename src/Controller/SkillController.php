@@ -3,11 +3,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\User\GetUserFullPublicInfoDTO;
+use App\Entity\Skill;
 use App\Repository\SkillRepository;
 use App\Repository\UserRepository;
-use App\Services\AddSkill;
+use App\Services\SkillService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,18 +27,22 @@ class SkillController extends AbstractController
      */
     private SkillRepository $skillRepository;
     /**
-     * @var AddSkill
+     * @var SkillService
      */
-    private AddSkill $addSkillService;
+    private SkillService $skillService;
     /**
      * @var UserRepository
      */
     private UserRepository $userRepository;
-
-    public function __construct(SkillRepository $skillRepository, AddSkill $addSkillService, UserRepository $userRepository)
+    
+    public function __construct(
+        SkillRepository $skillRepository,
+        SkillService $skillService,
+        UserRepository $userRepository
+    )
     {
         $this->skillRepository = $skillRepository;
-        $this->addSkillService = $addSkillService;
+        $this->skillService = $skillService;
         $this->userRepository = $userRepository;
     }
 
@@ -48,7 +54,9 @@ class SkillController extends AbstractController
     public function add(Request $request) : Response
     {
         try {
-            $this->addSkillService->add( json_decode($request->getContent(),true), $this->getUser() );
+            $skill = $this->skillService->create( json_decode($request->getContent(),true) );
+            $this->skillService->addSkillToUser($this->getUser(), $skill);
+            
             return $this->json([
                 'result' => 'success'
             ],201);
@@ -65,25 +73,61 @@ class SkillController extends AbstractController
      * @return Response
      * @Route("/{id}/users", name="skill_get_users", methods={"get"})
      */
+    
     public function getSkillUsers(int $id, Request $request): Response
     {
         try {
-            $users = [];
             $data = json_decode($request->getContent(),true);
             $limit = $data['limit'] ?? 20;
             $offset = $data['offset'] ?? 0;
             $mentor = $data['mentor'] ?? 0;
-    
-            foreach ($this->skillRepository->getUsers($id,$limit,$offset,(bool)$mentor) as $user) {
-                $users[] = (new GetUserFullPublicInfoDTO($user))->toArray();
-            }
+
             return $this->json([
-                'users' => $users
-            ],200);
+                'users' => $this->skillService->getSkillUsers($id, (bool)$mentor, $limit, $offset)
+            ]);
         }catch (Exception $e) {
             return $this->json([
                 'error' => $e->getMessage()
             ],400);
+        }
+    }
+    
+    /**
+     * @param Skill $skill
+     * @return JsonResponse
+     * @Route("/{id}/verify", name="skill_verify", methods={"post"})
+     */
+    public function verify(Skill $skill): JsonResponse
+    {
+        try {
+            $this->skillService->edit(['valid' => true], $skill);
+            return $this->json([
+                'result' => 'success'
+            ]);
+        }catch (Exception $e) {
+            return $this->json([
+                'error' => $e->getMessage()
+            ],$e->getCode());
+        }
+    }
+    
+    /**
+     * @param Skill $skill
+     * @param Request $request
+     * @return JsonResponse
+     * @Route("/{id}", name="skill_edit", methods={"patch"})
+     */
+    public function edit(Skill $skill, Request $request): JsonResponse
+    {
+        try {
+            $this->skillService->edit( json_decode($request->getContent(),true), $skill );
+            return $this->json([
+                'result' => 'success'
+            ]);
+        }catch (Exception $e) {
+            return $this->json([
+                'error' => $e->getMessage()
+            ],$e->getCode());
         }
     }
 }

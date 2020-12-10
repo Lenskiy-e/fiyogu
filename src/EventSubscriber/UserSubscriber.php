@@ -6,7 +6,6 @@ use App\Event\UserCreateEvent;
 use App\Mailer\UserRegisteredMailer;
 use App\Services\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 

@@ -40,18 +40,17 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @param Profile $profile
      * @param Request $request
      * @return Response
-     * @Route ("/{id}", name="update_profile", methods={"patch"})
+     * @Route ("/", name="update_profile", methods={"patch"})
      */
     public function update
     (
-        Profile $profile,
         Request $request
     ) : Response
     {
         try {
+            $profile = $this->getUser()->getProfile();
             $data = json_decode($request->getContent(),true);
             $form = $this->createForm(UpdateProfileType::class, $profile);
             $form->submit($data);

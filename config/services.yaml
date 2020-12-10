@@ -34,3 +34,6 @@ services:
     App\EventSubscriber\UserTestimonialsSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default}
+    App\EventSubscriber\UserPublicInfoSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
