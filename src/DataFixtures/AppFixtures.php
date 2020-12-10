@@ -82,6 +82,7 @@ class AppFixtures extends Fixture
 
             $profile->setName($faker->firstName());
             $profile->setUser($user);
+            $profile->setMentor(rand(0,1));
 
             $manager->persist($user);
             $manager->persist($profile);

@@ -101,12 +101,8 @@ class TestimonialsControllerTest extends WebTestCase
     public function testAddReturnErrorNonMentor()
     {
         $client = static::createClient();
-        
-        $user_to = $this->userRepository->findOneBy([
-            'active' => true,
-        ], [
-            'id' => 'desc'
-        ]);
+    
+        $user_to = $this->userRepository->getUsers(false,3)[2];
     
         $client->request('POST', "/testimonials/{$user_to->getId()}",[],[],
             [
@@ -146,10 +142,137 @@ class TestimonialsControllerTest extends WebTestCase
         $this->assertContains( 'Forbidden to write testimonials for yourself', $response->getContent());
     }
     
+    public function testEditReturnSuccessResponse()
+    {
+        $client = static::createClient();
+    
+        $client->request('POST', "/testimonials/{$this->user_to->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit',
+                'rating'    => 3
+            ])
+        );
+    
+        $testimonial = $this->testimonialsRepository->findOneBy([
+            'text'      => 'Testimonial from phpunit',
+            'user_from' => $this->user,
+            'user_to'   => $this->user_to
+        ]);
+    
+        $client->request('PATCH', "/testimonials/{$testimonial->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit new',
+                'rating'    => 5
+            ])
+        );
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertContains(json_encode(['status' => 'success']), $client->getResponse()->getContent());
+    }
+    
+    public function testEditReturnErrorOnNonMaintainer()
+    {
+        $client = static::createClient();
+    
+        $client->request('POST', "/testimonials/{$this->user_to->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit',
+                'rating'    => 3
+            ])
+        );
+    
+        $testimonial = $this->testimonialsRepository->findOneBy([
+            'text'      => 'Testimonial from phpunit',
+            'user_from' => $this->user,
+            'user_to'   => $this->user_to
+        ]);
+    
+        $client->request('PATCH', "/testimonials/{$testimonial->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user_to->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit new',
+                'rating'    => 5
+            ])
+        );
+    
+        $this->assertEquals(403, $client->getResponse()->getStatusCode());
+        $this->assertContains('You need to be testimonial maintainer to edit it', $client->getResponse()->getContent());
+    }
+    
+    public function testDeleteReturnSuccessResponse()
+    {
+        $client = static::createClient();
+    
+        $client->request('POST', "/testimonials/{$this->user_to->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit',
+                'rating'    => 3
+            ])
+        );
+    
+        $testimonial = $this->testimonialsRepository->findOneBy([
+            'text'      => 'Testimonial from phpunit',
+            'user_from' => $this->user,
+            'user_to'   => $this->user_to
+        ]);
+    
+        $client->request('DELETE', "/testimonials/{$testimonial->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ]
+        );
+    
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertContains(json_encode(['status' => 'success']), $client->getResponse()->getContent());
+    }
+    
+    public function testDeleteReturnErrorOnNonMaintainer()
+    {
+        $client = static::createClient();
+    
+        $client->request('POST', "/testimonials/{$this->user_to->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
+            ],
+            json_encode([
+                'text'      => 'Testimonial from phpunit',
+                'rating'    => 3
+            ])
+        );
+    
+        $testimonial = $this->testimonialsRepository->findOneBy([
+            'text'      => 'Testimonial from phpunit',
+            'user_from' => $this->user,
+            'user_to'   => $this->user_to
+        ]);
+    
+        $client->request('DELETE', "/testimonials/{$testimonial->getId()}",[],[],
+            [
+                'HTTP_X-AUTH-TOKEN' => "{$this->user_to->getSessionToken()}"
+            ]
+        );
+    
+        $this->assertEquals(403, $client->getResponse()->getStatusCode());
+        $this->assertContains('You need to be testimonial maintainer to delete it', $client->getResponse()->getContent());
+    }
+    
     private function removeTestimonial()
     {
         $testimonial = $this->testimonialsRepository->findOneBy([
-            'text'      => 'Testimonial from phpunit',
             'user_from' => $this->user,
             'user_to'   => $this->user_to
         ]);
@@ -162,7 +285,7 @@ class TestimonialsControllerTest extends WebTestCase
     private function getUser(bool $to = false) : User
     {
         if($to) {
-            $users = $this->userRepository->getMentors(1);
+            $users = $this->userRepository->getUsers(true,1);
             return $users[0];
         }
         return $this->userRepository->findOneBy([

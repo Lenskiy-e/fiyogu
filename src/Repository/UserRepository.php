@@ -77,7 +77,7 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
     }
     
-    public function getMentors(int $limit = 20, int $offset = 0)
+    public function getUsers(bool $mentor = false, int $limit = 20, int $offset = 0)
     {
         if($offset > 0) {
             $offset *= $limit;
@@ -85,7 +85,8 @@ class UserRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('u')
             ->innerJoin('u.profile', 'p')
             ->where('u.active = 1')
-            ->where('p.mentor = 1')
+            ->where('p.mentor = :mentor')
+            ->setParameter('mentor', $mentor)
             ->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()

@@ -73,7 +73,7 @@ class TestimonialsController extends AbstractController
             $this->testimonialsService->update($testimonial,$this->getUser(),$request);
             return $this->json([
                 'status' => 'success'
-            ],201);
+            ]);
         }catch (BadRequestException $e) {
             return $this->json([
                 'error' => $e->getMessage()
@@ -92,7 +92,7 @@ class TestimonialsController extends AbstractController
             $this->testimonialsService->delete($testimonial,$this->getUser());
             return $this->json([
                 'status' => 'success'
-            ],200);
+            ]);
         }catch (BadRequestException $e) {
             return $this->json([
                 'error' => $e->getMessage()
