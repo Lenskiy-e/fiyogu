@@ -60,7 +60,7 @@ class UserRepository extends ServiceEntityRepository
      * @param int $offset
      * @return int|mixed|string
      */
-    public function getUsersWithTestimonials(int $min_count = 1, int $limit = 20, int $offset = 0)
+    public function getUsersWithTestimonials(int $min_count = 0, int $limit = 20, int $offset = 0)
     {
         if($offset > 0) {
             $offset *= $limit;

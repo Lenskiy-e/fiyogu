@@ -2,13 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Profile;
 use App\Form\UpdateProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,7 +39,7 @@ class ProfileController extends AbstractController
     /**
      * @param Request $request
      * @return Response
-     * @Route ("/", name="update_profile", methods={"patch"})
+     * @Route ("", name="update_profile", methods={"patch"})
      */
     public function update
     (

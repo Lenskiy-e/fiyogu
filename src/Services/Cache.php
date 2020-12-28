@@ -31,7 +31,7 @@ class Cache
     public function getSkillUsers(int $id): array
     {
         try {
-            return $this->cache->getItem("skill-{$id}-users")->get();
+            return $this->cache->getItem("skill-{$id}-users")->get() ?? [];
         } catch (InvalidArgumentException $e) {
             return [];
         }
@@ -43,12 +43,9 @@ class Cache
      */
     private function setSkillUsers(CacheItemInterface $item, array $users) : void
     {
-        try {
-            shuffle($users);
-            $item->set($users);
-            $this->cache->save($item);
-        } catch (InvalidArgumentException $e) {
-        }
+        shuffle($users);
+        $item->set($users);
+        $this->cache->save($item);
     }
     
     /**

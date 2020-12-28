@@ -105,8 +105,8 @@ class UserControllerTest extends WebTestCase
         $client->request('GET', "/user/{$this->user_with_testimonials->getId()}/testimonials",[],[],[
             'HTTP_X-AUTH-TOKEN' => "{$this->user_with_testimonials->getSessionToken()}"
         ]);
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), $client->getResponse()->getContent());
     }
 
     public function testGetTestimonialsReturnNotFound()
@@ -147,10 +147,13 @@ class UserControllerTest extends WebTestCase
         }
     }
 
-    private function getUser(bool $with_testimonials = false) : User
+    private function getUser(bool $with_testimonials = false, int $offset = 0) : User
     {
         if($with_testimonials) {
-            $users = $this->userRepository->getUsersWithTestimonials(1,1,0);
+            $users = $this->userRepository->getUsersWithTestimonials(1,1,$offset);
+            if(!$users[0]->getSessionToken()) {
+                return $this->getUser(true, ++$offset);
+            }
             return $users[0];
         }
         return $this->userRepository->findOneBy([

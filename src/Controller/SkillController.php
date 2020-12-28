@@ -2,7 +2,6 @@
 declare(strict_types=1);
 namespace App\Controller;
 
-use App\DTO\User\GetUserFullPublicInfoDTO;
 use App\Entity\Skill;
 use App\Repository\SkillRepository;
 use App\Repository\UserRepository;
@@ -81,9 +80,15 @@ class SkillController extends AbstractController
             $limit = $data['limit'] ?? 20;
             $offset = $data['offset'] ?? 0;
             $mentor = $data['mentor'] ?? 0;
+            
+            $users = $this->skillService->getSkillUsers($id, (bool)$mentor, $limit, $offset);
+            
+            if(!$users) {
+                $users = $this->skillRepository->getUsers($id, $limit, $offset, (bool)$mentor);
+            }
 
             return $this->json([
-                'users' => $this->skillService->getSkillUsers($id, (bool)$mentor, $limit, $offset)
+                'users' => $users
             ]);
         }catch (Exception $e) {
             return $this->json([
