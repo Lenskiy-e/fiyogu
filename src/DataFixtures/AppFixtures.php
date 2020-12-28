@@ -63,7 +63,7 @@ class AppFixtures extends Fixture
         $faker->addProvider(new PhoneNumber($faker));
         $tokenGenerator = new TokenGenerator();
 
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $user = new User();
             $profile = new Profile();
             $active = rand(0,1);
@@ -121,7 +121,7 @@ class AppFixtures extends Fixture
     public function loadTestimonials(ObjectManager $manager)
     {
 
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $users = $this->getUsers();
 
             $testimonial = new Testimonials();

@@ -35,22 +35,19 @@ class ProfileControllerTest extends WebTestCase
 
     public function testUpdateReturnSuccessStatus()
     {
-        $profile = $this->user->getProfile();
         $client = static::createClient();
 
-        $client->request('PATCH', "/profile/{$profile->getId()}",[],[],[
+        $client->request('PATCH', "/profile",[],[],[
             'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
         ]);
-
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 
     public function testUpdateReturnJson()
     {
-        $profile = $this->user->getProfile();
         $client = static::createClient();
 
-        $client->request('PATCH', "/profile/{$profile->getId()}",[],[],[
+        $client->request('PATCH', "/profile",[],[],[
             'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
         ]);
 
@@ -61,7 +58,7 @@ class ProfileControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request('PATCH', "/profile/123123123123",[],[],[
+        $client->request('PATCH', "/profile/12345",[],[],[
             'HTTP_X-AUTH-TOKEN' => "{$this->user->getSessionToken()}"
         ]);
 

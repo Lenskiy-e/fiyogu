@@ -42,13 +42,15 @@ class UpdateRatingService
     public function updateRating(int $user_id, Testimonials $testimonials = null)
     {
         $user = $this->entityManager->find(User::class,$user_id);
-
+        $rating = 0;
         $ratingData = $this->testimonialsRepository->getRating($user_id);
 
         if($testimonials) {
             $rating = ( (float)$ratingData['sum'] + $testimonials->getRating() ) / ( (int)$ratingData['count'] + 1);
         }else{
-            $rating = ( (float)$ratingData['sum']) / ( (int)$ratingData['count']);
+            if($ratingData['sum'] && $ratingData['count']) {
+                $rating = ( (float)$ratingData['sum'] ) / ( (int)$ratingData['count'] );
+            }
         }
 
         $user->setRating(round($rating,2));

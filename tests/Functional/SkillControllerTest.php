@@ -165,7 +165,7 @@ class SkillControllerTest extends WebTestCase
             ]
         );
         $response = json_decode($client->getResponse()->getContent(),true);
-        
+
         if(isset($response['users'])) {
             self::ensureKernelShutdown();
             $count = count($response['users']);
