@@ -50,6 +50,10 @@ class TestimonialsService
      */
     public function create(UserInterface $user, UserInterface $currentUser, Request $request) : void
     {
+        if($user === $currentUser) {
+            throw new BadRequestException('Forbidden to write testimonials for yourself',403);
+        }
+        
         if( !$user->getProfile()->isMentor() ) {
             throw new BadRequestException('Only mentor can have a review',403);
         }
@@ -74,6 +78,15 @@ class TestimonialsService
 
         $review = $this->persistRequestToTestimonial( json_decode($request->getContent(),true), $testimonial );
         $this->commit($review);
+    }
+
+    public function delete(Testimonials $testimonial, UserInterface $user) : void
+    {
+        if( $testimonial->getUserFrom() !== $user ) {
+            throw new BadRequestException('You need to be testimonial maintainer to delete it',403);
+        }
+        $this->entityManager->remove($testimonial);
+        $this->entityManager->flush();
     }
 
     /**

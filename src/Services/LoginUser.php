@@ -61,21 +61,21 @@ class LoginUser
     public function login(array $credentials) : string
     {
         if( !isset($credentials['email']) || !isset($credentials['password'])) {
-            throw new BadRequestException('Please, provide email and password');
+            throw new BadRequestException('Please, provide email and password', 400);
         }
 
         $user = $this->userRepository->findOneBy(['email' => $credentials['email']]);
 
         if(!$user) {
-            throw new EntityNotFoundException('User not found');
+            throw new EntityNotFoundException('User not found', 404);
         }
 
         if(!$user->isActive()) {
-            throw new EntityNotFoundException('Please, activate your account');
+            throw new EntityNotFoundException('Please, activate your account', 404);
         }
 
         if ( !$this->validPassword($credentials['password'],$user) ) {
-            throw new BadRequestException('Email or password is invalid');
+            throw new BadRequestException('Email or password is invalid', 400);
         }
 
         return $this->setSessionToken($user);

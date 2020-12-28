@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Class SecurityController
@@ -45,7 +44,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/login", name="user_login")
+     * @Route("/login", name="user_login", methods={"POST"})
      * @param Request $request
      * @param LoginUser $loginUser
      * @return Response
@@ -61,7 +60,7 @@ class SecurityController extends AbstractController
         }catch (EntityNotFoundException|BadRequestException $e) {
             return $this->json([
                 'error'    => $e->getMessage()
-            ],404);
+            ],$e->getCode());
         }
     }
 

@@ -44,7 +44,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         return $userProvider->loadUserByUsername($credentials);
     }
 
-    public function checkCredentials($credentials, UserInterface $user)
+    public function checkCredentials($credentials, UserInterface $user): bool
     {
         return $credentials === $user->getSessionToken();
     }

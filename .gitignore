@@ -13,3 +13,9 @@ composer.lock
 ###< symfony/framework-bundle ###
 .env
 /src/DTO_old/
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###

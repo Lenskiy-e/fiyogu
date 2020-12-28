@@ -4,7 +4,6 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -24,6 +23,11 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * @param string $token
+     * @return User|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function findForActivation(string $token) : ?User
     {
         return $this->createQueryBuilder('u')
@@ -34,6 +38,10 @@ class UserRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * @param int $skill_id
+     * @return int|mixed|string
+     */
     public function getUsersWithSkill(int $skill_id)
     {
         $query = $this->createQueryBuilder('u')
@@ -45,33 +53,43 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
         return $query;
     }
-
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    
+    /**
+     * @param int $min_count
+     * @param int $limit
+     * @param int $offset
+     * @return int|mixed|string
+     */
+    public function getUsersWithTestimonials(int $min_count = 1, int $limit = 20, int $offset = 0)
     {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        if($offset > 0) {
+            $offset *= $limit;
+        }
 
-    /*
-    public function findOneBySomeField($value): ?User
-    {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('u.testimonials', 't')
+            ->groupBy('u')
+            ->having('count(t.id) > :count')
+            ->setParameter('count', $min_count)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
+    
+    public function getUsers(bool $mentor = false, int $limit = 20, int $offset = 0)
+    {
+        if($offset > 0) {
+            $offset *= $limit;
+        }
+        return $this->createQueryBuilder('u')
+            ->innerJoin('u.profile', 'p')
+            ->where('u.active = 1')
+            ->where('p.mentor = :mentor')
+            ->setParameter('mentor', $mentor)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+    }
 }

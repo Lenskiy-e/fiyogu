@@ -2,12 +2,13 @@
 
 namespace App\EventSubscriber;
 
-use App\Entity\Profile;
 use App\Event\UserCreateEvent;
 use App\Mailer\UserRegisteredMailer;
+use App\Message\SendEmailMessage;
 use App\Services\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserSubscriber implements EventSubscriberInterface
@@ -28,25 +29,29 @@ class UserSubscriber implements EventSubscriberInterface
      * @var UserRegisteredMailer
      */
     private UserRegisteredMailer $mailer;
-
+    /**
+     * @var MessageBusInterface
+     */
+    private MessageBusInterface $bus;
+    
     /**
      * UserSubscriber constructor.
      * @param EntityManagerInterface $manager
      * @param TokenGenerator $generator
      * @param UserPasswordEncoderInterface $encoder
-     * @param UserRegisteredMailer $mailer
+     * @param MessageBusInterface $bus
      */
     public function __construct(
         EntityManagerInterface $manager,
         TokenGenerator $generator,
         UserPasswordEncoderInterface $encoder,
-        UserRegisteredMailer $mailer
+        MessageBusInterface $bus
     )
     {
         $this->manager = $manager;
         $this->generator = $generator;
         $this->encoder = $encoder;
-        $this->mailer = $mailer;
+        $this->bus = $bus;
     }
 
     public function onUserCreate(UserCreateEvent $event)
@@ -60,15 +65,15 @@ class UserSubscriber implements EventSubscriberInterface
 
         $this->manager->persist($user);
         $this->manager->flush();
-
-        $this->mailer->send($user);
+        
+        $this->bus->dispatch( new SendEmailMessage($user) );
 
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            UserCreateEvent::NAME => 'onUserCreate',
+            UserCreateEvent::NAME   => 'onUserCreate'
         ];
     }
 }

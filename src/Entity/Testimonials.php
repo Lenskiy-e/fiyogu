@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\TestimonialsRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -13,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="testimonials", uniqueConstraints={
  *     @ORM\UniqueConstraint(name="user_from_to", columns={"user_from_id", "user_to_id"})
  * })
+ * @ORM\HasLifecycleCallbacks()
  */
 class Testimonials
 {
@@ -45,6 +45,17 @@ class Testimonials
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="user_reviews")
      */
     private UserInterface $user_from;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean")
+     */
+    private bool $verified;
+
+    public function __construct()
+    {
+        $this->verified = false;
+    }
 
     /**
      * @return int|null
@@ -118,5 +129,19 @@ class Testimonials
         $this->user_from = $user_from;
     }
 
+    /**
+     * @return bool
+     */
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
 
+    /**
+     * @param bool $verified
+     */
+    public function setVerified(bool $verified): void
+    {
+        $this->verified = $verified;
+    }
 }

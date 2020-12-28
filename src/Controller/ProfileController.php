@@ -17,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class ProfileController
  * @package App\Controller
  * @Route ("/profile")
- * @Security("is_granted('ROLE_USER')")
  */
 class ProfileController extends AbstractController
 {
@@ -41,25 +40,32 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @param Profile $profile
      * @param Request $request
      * @return Response
-     * @Route ("/{id}/update", name="update_profile", methods={"patch"})
+     * @Route ("/", name="update_profile", methods={"patch"})
      */
     public function update
     (
-        Profile $profile,
         Request $request
     ) : Response
     {
-        $data = json_decode($request->getContent(),true);
-        $form = $this->createForm(UpdateProfileType::class, $profile);
-        $form->submit($data);
+        try {
+            $profile = $this->getUser()->getProfile();
+            $data = json_decode($request->getContent(),true);
+            $form = $this->createForm(UpdateProfileType::class, $profile);
+            $form->submit($data);
 
-        $this->manager->persist($profile);
-        $this->manager->flush();
-        return $this->json([
-            'result' => 'success'
-        ], 200);
+            $this->manager->persist($profile);
+            $this->manager->flush();
+            return $this->json([
+                'result' => 'success'
+            ], 200);
+        }catch(\Exception $e) {
+            $this->logger->error($e->getTraceAsString());
+
+            return $this->json([
+                'errors' => $e->getMessage()
+            ],$e->getCode());
+        }
     }
 }

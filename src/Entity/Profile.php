@@ -91,9 +91,9 @@ class Profile
     /**
      * @return mixed
      */
-    public function getSurname()
+    public function getSurname() : string
     {
-        return $this->surname;
+        return $this->surname ?? '';
     }
 
     /**
@@ -105,11 +105,11 @@ class Profile
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPhone()
+    public function getPhone() : string
     {
-        return $this->phone;
+        return $this->phone ?? '';
     }
 
     /**

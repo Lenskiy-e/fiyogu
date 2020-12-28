@@ -120,6 +120,9 @@
     "php": {
         "version": "7.4"
     },
+    "predis/predis": {
+        "version": "v1.1.6"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -146,6 +149,12 @@
     },
     "swiftmailer/swiftmailer": {
         "version": "v6.2.3"
+    },
+    "symfony/amqp-messenger": {
+        "version": "v5.1.9"
+    },
+    "symfony/browser-kit": {
+        "version": "v5.1.9"
     },
     "symfony/cache": {
         "version": "v5.1.8"
@@ -176,6 +185,12 @@
     },
     "symfony/doctrine-bridge": {
         "version": "v5.1.8"
+    },
+    "symfony/doctrine-messenger": {
+        "version": "v5.1.9"
+    },
+    "symfony/dom-crawler": {
+        "version": "v5.1.9"
     },
     "symfony/dotenv": {
         "version": "v5.1.8"
@@ -251,6 +266,18 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
+    "symfony/messenger": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "e9a414b113ceadbf4e52abe37bf8f1b443f06ccb"
+        },
+        "files": [
+            "config/packages/messenger.yaml"
+        ]
+    },
     "symfony/monolog-bridge": {
         "version": "v5.1.8"
     },
@@ -274,6 +301,21 @@
     },
     "symfony/orm-pack": {
         "version": "v2.0.0"
+    },
+    "symfony/phpunit-bridge": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "6d0e35f749d5f4bfe1f011762875275cd3f9874f"
+        },
+        "files": [
+            ".env.test",
+            "bin/phpunit",
+            "phpunit.xml.dist",
+            "tests/bootstrap.php"
+        ]
     },
     "symfony/polyfill-intl-grapheme": {
         "version": "v1.20.0"
@@ -301,6 +343,9 @@
     },
     "symfony/property-info": {
         "version": "v5.1.8"
+    },
+    "symfony/redis-messenger": {
+        "version": "v5.1.9"
     },
     "symfony/routing": {
         "version": "5.1",

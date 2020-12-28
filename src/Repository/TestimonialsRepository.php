@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Profile;
 use App\Entity\Testimonials;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,37 +16,48 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class TestimonialsRepository extends ServiceEntityRepository
 {
+    /**
+     * TestimonialsRepository constructor.
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Testimonials::class);
     }
 
-    // /**
-    //  * @return Testimonials[] Returns an array of Testimonials objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param int $user_id
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     */
+    public function findByUserTo(int $user_id, int $limit, int $offset) : array
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('t.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        if($offset > 0) {
+            $offset *= $limit;
+        }
+        $query = $this->createQueryBuilder('t')
+            ->innerJoin(Profile::class,'p', Join::WITH, 'p.user = t.user_from')
+            ->select('identity(t.user_from) as user_from, (p.name) as from_name, t.text, t.rating')
+            ->where('t.user_to = :user_id')
+            ->andWhere('t.verified = 1')
+            ->setParameter('user_id', $user_id)
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery();
 
-    /*
-    public function findOneBySomeField($value): ?Testimonials
-    {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        return $query->getArrayResult();
     }
-    */
+
+    public function getRating(int $user_id) : array
+    {
+        $query = $this->createQueryBuilder('t')
+            ->select('SUM(t.rating) as sum, count(t.id) as count')
+            ->where('t.user_to = :id')
+            ->andWhere('t.verified = 1')
+            ->setParameter('id', $user_id)
+            ->getQuery()
+            ->getResult();
+        return $query[0];
+    }
 }

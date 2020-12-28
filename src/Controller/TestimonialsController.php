@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Testimonials;
 use App\Entity\User;
-use App\Form\TestimonialType;
 use App\Services\FormErrors;
 use App\Services\TestimonialsService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -22,7 +21,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class TestimonialsController extends AbstractController
 {
-
     /**
      * @var EntityManagerInterface
      */
@@ -75,7 +73,26 @@ class TestimonialsController extends AbstractController
             $this->testimonialsService->update($testimonial,$this->getUser(),$request);
             return $this->json([
                 'status' => 'success'
-            ],201);
+            ]);
+        }catch (BadRequestException $e) {
+            return $this->json([
+                'error' => $e->getMessage()
+            ], $e->getCode());
+        }
+    }
+
+    /**
+     * @param Testimonials $testimonial
+     * @return Response
+     * @Route ("/{id}", name="testimonials_delete", methods={"delete"})
+     */
+    public function delete(Testimonials $testimonial) : Response
+    {
+        try {
+            $this->testimonialsService->delete($testimonial,$this->getUser());
+            return $this->json([
+                'status' => 'success'
+            ]);
         }catch (BadRequestException $e) {
             return $this->json([
                 'error' => $e->getMessage()
