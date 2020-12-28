@@ -63,7 +63,7 @@ class AppFixtures extends Fixture
         $faker->addProvider(new PhoneNumber($faker));
         $tokenGenerator = new TokenGenerator();
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $user = new User();
             $profile = new Profile();
             $active = rand(0,1);
@@ -83,6 +83,7 @@ class AppFixtures extends Fixture
             $profile->setName($faker->firstName());
             $profile->setUser($user);
             $profile->setMentor(rand(0,1));
+            $user->setProfile($profile);
 
             $manager->persist($user);
             $manager->persist($profile);
