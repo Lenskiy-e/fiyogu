@@ -3,7 +3,6 @@
 namespace App\EventSubscriber;
 
 use App\Event\UserCreateEvent;
-use App\Mailer\UserRegisteredMailer;
 use App\Message\SendEmailMessage;
 use App\Services\TokenGenerator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,10 +24,7 @@ class UserSubscriber implements EventSubscriberInterface
      * @var UserPasswordEncoderInterface
      */
     private UserPasswordEncoderInterface $encoder;
-    /**
-     * @var UserRegisteredMailer
-     */
-    private UserRegisteredMailer $mailer;
+
     /**
      * @var MessageBusInterface
      */
