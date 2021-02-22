@@ -9,7 +9,7 @@ class TokenGeneratorTest extends TestCase
 {
     private TokenGenerator $tokenGenerator;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->tokenGenerator = new TokenGenerator();
     }

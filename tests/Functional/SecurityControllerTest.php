@@ -23,7 +23,7 @@ class SecurityControllerTest extends WebTestCase
     /** @var User */
     private User $nonactive_user;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         self::bootKernel();
         /** @var EntityManagerInterface $entityManager */
