@@ -7,12 +7,10 @@ use App\Repository\SkillRepository;
 use App\Repository\UserRepository;
 use App\Services\SkillService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use \Exception;
 
 /**
  * Class SkillController
@@ -52,18 +50,12 @@ class SkillController extends AbstractController
      */
     public function add(Request $request) : Response
     {
-        try {
-            $skill = $this->skillService->create( json_decode($request->getContent(),true) );
-            $this->skillService->addSkillToUser($this->getUser(), $skill);
-            
-            return $this->json([
-                'result' => 'success'
-            ],201);
-        }catch (BadRequestException $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ],400);
-        }
+        $skill = $this->skillService->create( json_decode($request->getContent(),true) );
+        $this->skillService->addSkillToUser($this->getUser(), $skill);
+    
+        return $this->json([
+            'result' => 'success'
+        ],201);
     }
     
     /**
@@ -75,26 +67,20 @@ class SkillController extends AbstractController
     
     public function getSkillUsers(int $id, Request $request): Response
     {
-        try {
-            $data = json_decode($request->getContent(),true);
-            $limit = $data['limit'] ?? 20;
-            $offset = $data['offset'] ?? 0;
-            $mentor = $data['mentor'] ?? 0;
-            
-            $users = $this->skillService->getSkillUsers($id, (bool)$mentor, $limit, $offset);
-            
-            if(!$users) {
-                $users = $this->skillRepository->getUsers($id, $limit, $offset, (bool)$mentor);
-            }
-
-            return $this->json([
-                'users' => $users
-            ]);
-        }catch (Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ],400);
+        $data = json_decode($request->getContent(),true);
+        $limit = $data['limit'] ?? 20;
+        $offset = $data['offset'] ?? 0;
+        $mentor = $data['mentor'] ?? 0;
+    
+        $users = $this->skillService->getSkillUsers($id, (bool)$mentor, $limit, $offset);
+    
+        if(!$users) {
+            $users = $this->skillRepository->getUsers($id, $limit, $offset, (bool)$mentor);
         }
+    
+        return $this->json([
+            'users' => $users
+        ]);
     }
     
     /**
@@ -104,16 +90,10 @@ class SkillController extends AbstractController
      */
     public function verify(Skill $skill): JsonResponse
     {
-        try {
-            $this->skillService->edit(['valid' => true], $skill);
-            return $this->json([
-                'result' => 'success'
-            ]);
-        }catch (Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ],$e->getCode());
-        }
+        $this->skillService->edit(['valid' => true], $skill);
+        return $this->json([
+            'result' => 'success'
+        ]);
     }
     
     /**
@@ -124,15 +104,9 @@ class SkillController extends AbstractController
      */
     public function edit(Skill $skill, Request $request): JsonResponse
     {
-        try {
-            $this->skillService->edit( json_decode($request->getContent(),true), $skill );
-            return $this->json([
-                'result' => 'success'
-            ]);
-        }catch (Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ],$e->getCode());
-        }
+        $this->skillService->edit( json_decode($request->getContent(),true), $skill );
+        return $this->json([
+            'result' => 'success'
+        ]);
     }
 }

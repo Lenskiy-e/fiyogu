@@ -60,7 +60,7 @@ class SkillService
     public function create(array $request) : Skill
     {
         if(!$request['name']) {
-            throw new BadRequestException('Please, provide the name');
+            throw new BadRequestException('Please, provide the name',400);
         }
 
         $skillName = strtolower($request['name']);
@@ -83,7 +83,7 @@ class SkillService
         $userSkills = $user->getSkills();
     
         if($userSkills->contains($skill)) {
-            throw new BadRequestException('User already has this skill');
+            throw new BadRequestException('User already has this skill',400);
         }
     
         $userSkills->add($skill);
@@ -123,14 +123,5 @@ class SkillService
             }
         }
         return array_splice($users, $offset, $limit);
-    }
-
-    /**
-     * @param string $skillName
-     * @return Skill|null
-     */
-    private function getSkill(string $skillName) : ?Skill
-    {
-        return $this->skillRepository->findOneBy(['name' => $skillName]);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\DTO\DTOException;
 use App\DTO\User\GetUserFullPublicInfoDTO;
 use App\Entity\Skill;
 use App\Entity\User;
@@ -79,21 +78,7 @@ class UserController extends AbstractController
      */
     public function getUserPublicInfo(User $user): Response
     {
-        try {
-            return $this->json( (new GetUserFullPublicInfoDTO($user))->toArray() );
-        }catch (DTOException $e) {
-            $this->logger->error($e->getTraceAsString());
-
-            $message = $e->getMessage();
-
-            if($e->getCode() === 477) {
-                $message = $e->getArrayErrors();
-            }
-
-            return $this->json([
-                'errors' => $message
-            ],$e->getCode());
-        }
+        return $this->json( (new GetUserFullPublicInfoDTO($user))->toArray() );
     }
 
     /**
@@ -105,21 +90,13 @@ class UserController extends AbstractController
      */
     public function getTestimonials(User $user, Request $request,TestimonialsRepository $testimonialsRepository) : Response
     {
-        try {
-            $requestData = json_decode($request->getContent(),true);
-            $limit = $requestData['limit'] ?? 20;
-            $offset = $requestData['offset'] ?? 0;
-
-            return $this->json([
-                'result' => $testimonialsRepository->findByUserTo($user->getId(), $limit, $offset)
-            ],200);
-        }catch (\Exception $e) {
-            $this->logger->error($e->getTraceAsString());
-
-            return $this->json([
-                'errors' => $e->getMessage()
-            ],$e->getCode());
-        }
+        $requestData = json_decode($request->getContent(),true);
+        $limit = $requestData['limit'] ?? 20;
+        $offset = $requestData['offset'] ?? 0;
+    
+        return $this->json([
+            'result' => $testimonialsRepository->findByUserTo($user->getId(), $limit, $offset)
+        ],200);
     }
     
     /**
@@ -130,22 +107,16 @@ class UserController extends AbstractController
      */
     public function addSkill(Skill $skill, EventDispatcherInterface $dispatcher) : JsonResponse
     {
-        try {
-            /** @var User $user */
-            $user = $this->getUser();
-            $user->getSkills()->add($skill);
-            
-            $event = new UserAddSkillEvent($skill, $user);
-            $dispatcher->dispatch($event, $event::NAME);
-            
-            return $this->json([
-                'result' => 'success'
-            ]);
-        }catch (\Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
-        }
+        /** @var User $user */
+        $user = $this->getUser();
+        $user->getSkills()->add($skill);
+    
+        $event = new UserAddSkillEvent($skill, $user);
+        $dispatcher->dispatch($event, $event::NAME);
+    
+        return $this->json([
+            'result' => 'success'
+        ]);
     }
     
     /**
@@ -156,21 +127,15 @@ class UserController extends AbstractController
      */
     public function removeSkill(Skill $skill, EventDispatcherInterface $dispatcher) : JsonResponse
     {
-        try {
-            /** @var User $user */
-            $user = $this->getUser();
-            $user->getSkills()->removeElement($skill);
+        /** @var User $user */
+        $user = $this->getUser();
+        $user->getSkills()->removeElement($skill);
     
-            $event = new UserRemoveSkillEvent($skill, $user);
-            $dispatcher->dispatch($event, $event::NAME);
-            
-            return $this->json([
-                'result' => 'success'
-            ]);
-        }catch (\Exception $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
-        }
+        $event = new UserRemoveSkillEvent($skill, $user);
+        $dispatcher->dispatch($event, $event::NAME);
+    
+        return $this->json([
+            'result' => 'success'
+        ]);
     }
 }

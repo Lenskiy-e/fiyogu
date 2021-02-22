@@ -6,10 +6,8 @@ use App\Entity\Testimonials;
 use App\Entity\User;
 use App\Services\FormErrors;
 use App\Services\TestimonialsService;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -45,20 +43,10 @@ class TestimonialsController extends AbstractController
      */
     public function add(User $user, Request $request) : Response
     {
-        try {
-            $this->testimonialsService->create($user,$this->getUser(),$request);
-            return $this->json([
-                'status' => 'success'
-            ],201);
-        }catch (UniqueConstraintViolationException $e) {
-            return $this->json([
-                'error' => 'User already left the review for this mentor'
-            ], 409);
-        }catch (BadRequestException $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
-        }
+        $this->testimonialsService->create($user,$this->getUser(),$request);
+        return $this->json([
+            'status' => 'success'
+        ],201);
     }
 
     /**
@@ -69,16 +57,10 @@ class TestimonialsController extends AbstractController
      */
     public function edit(Testimonials $testimonial, Request $request) : Response
     {
-        try {
-            $this->testimonialsService->update($testimonial,$this->getUser(),$request);
-            return $this->json([
-                'status' => 'success'
-            ]);
-        }catch (BadRequestException $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
-        }
+        $this->testimonialsService->update($testimonial,$this->getUser(),$request);
+        return $this->json([
+            'status' => 'success'
+        ]);
     }
 
     /**
@@ -88,15 +70,9 @@ class TestimonialsController extends AbstractController
      */
     public function delete(Testimonials $testimonial) : Response
     {
-        try {
-            $this->testimonialsService->delete($testimonial,$this->getUser());
-            return $this->json([
-                'status' => 'success'
-            ]);
-        }catch (BadRequestException $e) {
-            return $this->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
-        }
+        $this->testimonialsService->delete($testimonial,$this->getUser());
+        return $this->json([
+            'status' => 'success'
+        ]);
     }
 }

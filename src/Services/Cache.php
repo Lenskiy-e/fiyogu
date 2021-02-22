@@ -119,7 +119,7 @@ class Cache
         try {
             $this->cache->deleteItem("user-{$user->getId()}-public");
         } catch (InvalidArgumentException $e) {
-            throw new BadRequestException('Bad data provided');
+            throw new BadRequestException('Bad data provided',400);
         }
     }
 }

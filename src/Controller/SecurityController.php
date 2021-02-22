@@ -11,12 +11,10 @@ use App\Repository\UserRepository;
 use App\Services\FormErrors;
 use App\Services\LoginUser;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
-use Doctrine\ORM\NonUniqueResultException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -51,17 +49,11 @@ class SecurityController extends AbstractController
      */
     public function login(Request $request, LoginUser $loginUser): Response
     {
-        try {
-            $token = $loginUser->login( json_decode($request->getContent(),true) );
-            return $this->json([
-                'status'    => 'success',
-                'token'     => $token
-            ],200);
-        }catch (EntityNotFoundException|BadRequestException $e) {
-            return $this->json([
-                'error'    => $e->getMessage()
-            ],$e->getCode());
-        }
+        $token = $loginUser->login( json_decode($request->getContent(),true) );
+        return $this->json([
+            'status'    => 'success',
+            'token'     => $token
+        ],200);
     }
 
     /**
@@ -69,13 +61,13 @@ class SecurityController extends AbstractController
      * @param Request $request
      * @param EventDispatcherInterface $dispatcher
      * @param FormErrors $formErrorsService
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse
      */
     public function register(
         Request $request,
         EventDispatcherInterface $dispatcher,
         FormErrors $formErrorsService
-    )
+    ): JsonResponse
     {
         $data = json_decode($request->getContent(),true);
         $user = new User();
@@ -111,44 +103,27 @@ class SecurityController extends AbstractController
     /**
      * @param string $token
      * @param UserRepository $repository
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse
      * @Route("/activate/{token}",name="user_activate", methods={"get"})
      */
-    public function activate(string $token, UserRepository $repository)
+    public function activate(string $token, UserRepository $repository): JsonResponse
     {
-        try {
-            $user = $repository->findForActivation($token);
-
-            if(!$user) {
-                return $this->json([
-                    'error'    => 'User not found or already activate'
-                ],404);
-            }
-
-            $user->setActivationToken(null);
-            $user->setActive(true);
-
-            $this->manager->persist($user);
-            $this->manager->flush();
-
+        $user = $repository->findForActivation($token);
+    
+        if(!$user) {
             return $this->json([
-                'result' => 'success'
-            ],200);
-
-        } catch (NonUniqueResultException $e) {
-            $this->logger->error('Activation token duplicate!');
-            $this->logger->error($e->getMessage());
-            return $this->json([
-                'errors' => [
-                    "Server error, please, try again or write to out administrator: {$this->getParameter('admin_email')}"
-                ]
-            ],500);
-        } catch (EntityNotFoundException $e) {
-            $this->logger->error("Activate user by token {$token}");
-            $this->logger->error($e->getMessage());
-            return $this->json([
-                'errors' => ["User not found. You can support our administrator: {$this->getParameter('admin_email')}"]
+                'error'    => 'User not found or already activate'
             ],404);
         }
+    
+        $user->setActivationToken(null);
+        $user->setActive(true);
+    
+        $this->manager->persist($user);
+        $this->manager->flush();
+    
+        return $this->json([
+            'result' => 'success'
+        ],200);
     }
 }
